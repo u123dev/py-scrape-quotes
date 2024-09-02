@@ -18,9 +18,16 @@ BASE_URL = "https://quotes.toscrape.com/"
 AUTHORS = dict()
 
 
+def get_url_content(url: str) -> bytes:
+    """Get url content & raise exception if error"""
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.content
+
+
 def add_author(auth_url: str) -> None:
     if AUTHORS.get(auth_url) is None:
-        auth_page = requests.get(urljoin(BASE_URL, auth_url)).content
+        auth_page = get_url_content(urljoin(BASE_URL, auth_url))
         soup = BeautifulSoup(auth_page, "html.parser")
         auth = soup.select_one(".author-details")
 
@@ -58,7 +65,7 @@ def get_qoutes(url: str) -> list[Quote]:
     next_url = ""
 
     while next_url is not None:
-        page = requests.get(urljoin(url, next_url)).content
+        page = get_url_content(urljoin(url, next_url))
         soup = BeautifulSoup(page, "html.parser")
 
         next_url = next_page_url(soup)
